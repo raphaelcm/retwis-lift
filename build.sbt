@@ -26,5 +26,6 @@ libraryDependencies ++= Seq(
   "org.eclipse.jetty" % "jetty-webapp" % "7.4.4.v20110707" % "jetty",
   //"javax.servlet" % "servlet-api" % "2.5" % "provided->default",
   //"com.h2database" % "h2" % "1.2.138",
-  "ch.qos.logback" % "logback-classic" % "0.9.26" % "compile->default"
+  "ch.qos.logback" % "logback-classic" % "0.9.26" % "compile->default",
+  "redis.clients" % "jedis" % "2.0.0" // % "compile"
 )
