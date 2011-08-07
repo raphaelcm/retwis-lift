@@ -1,60 +1,33 @@
 package com.retwis.model
 
 import _root_.redis.clients.jedis._
+import scala.collection.JavaConversions._
+import compat.Platform
 
+// Provide some static methods and access to JedisPool
 object Retwis {
 	val pool = new JedisPool(new JedisPoolConfig(), "localhost");
 
-	//return a random MD5 hash value
-	def getRand(): String = {
-		return "Stub!"
-	}
-
-	//return TRUE if logged in
-	def isLoggedIn(auth: String): Boolean = {
-		val jedis = pool.getResource()
-		try {
-			var userid = jedis.get("auth:" + auth)
-			if(userid != null) {
-				if(jedis.get("uid:" + userid + ":auth") == auth) {
-					pool.returnResource(jedis)
-					return true
-				}
-			} else {
-				pool.returnResource(jedis)
-				return false
-			}
+	//create a string showing the time elapsed
+	def strElapsed(time: Long): String = {
+		val elapsedSeconds = (Platform.currentTime - time) / 1000
+		if(elapsedSeconds < 60) return elapsedSeconds + " seconds"
+		if(elapsedSeconds < 3600) {
+			val m = elapsedSeconds / 60
+			return m + " minute"
 		}
-	}
-
-	def loadUserInfo(userid: String): User = {
-		val jedis = pool.getResource()
-		var username = jedis.get("uid:" + userid + ":username")
-		var password = jedis.get("uid:" + userid + ":password")
-		if (username == null || password == null) {
-			pool.returnResource(jedis)
-			return null
+		if(elapsedSeconds < 3600*24) {
+			val h = elapsedSeconds / 3600
+			return h + " hour"
 		}
-		return new User(userid, username, password)
+		val d = elapsedSeconds / (3600*24)
+		return d + " day"
 	}
 
+
+	
 /*
-
-function strElapsed($t) {
-    $d = time()-$t;
-    if ($d < 60) return "$d seconds";
-    if ($d < 3600) {
-        $m = (int)($d/60);
-        return "$m minute".($m > 1 ? "s" : "");
-    }
-    if ($d < 3600*24) {
-        $h = (int)($d/3600);
-        return "$h hour".($h > 1 ? "s" : "");
-    }
-    $d = (int)($d/(3600*24));
-    return "$d day".($d > 1 ? "s" : "");
-}
-
+// Some of this will go in view snippets
 function showPost($id) {
     $r = redisLink();
     $postdata = $r->get("post:$id");
@@ -72,6 +45,7 @@ function showPost($id) {
     echo('<i>posted '.$elapsed.' ago via web</i></div>');
     return true;
 }
+
 
 /*
 addPostsToTimeline

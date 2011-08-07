@@ -17,7 +17,8 @@ uid:1000:posts (list of posts ids)
 UPDATES
 
 incr global:nextPostId => 134
-post:134 id|time|message...
+pid:134:time => time (in mills)
+pid:134:message => message
 
 TIMELINE
 
