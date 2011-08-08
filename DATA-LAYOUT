@@ -5,6 +5,7 @@ User data
 
 incr global:nextUserId => 1000
 
+global:users (LIST of user ids)
 username:antirez:uid (the numeric ID of the user)
 uid:1000:username (the username of the user)
 uid:1000:password (password of course)
@@ -19,7 +20,8 @@ UPDATES
 incr global:nextPostId => 134
 pid:134:time => time (in mills)
 pid:134:message => message
+pid:134:username => name of poster
 
 TIMELINE
 
-Just a list of post IDs in global:timeline
+global:timeline (LIST of post IDs)

@@ -2,27 +2,10 @@ package com.retwis.model
 
 import _root_.redis.clients.jedis._
 import scala.collection.JavaConversions._
-import compat.Platform
 
 // Provide some static methods and access to JedisPool
 object Retwis {
 	val pool = new JedisPool(new JedisPoolConfig(), "localhost");
-
-	//create a string showing the time elapsed
-	def strElapsed(time: Long): String = {
-		val elapsedSeconds = (Platform.currentTime - time) / 1000
-		if(elapsedSeconds < 60) return elapsedSeconds + " seconds"
-		if(elapsedSeconds < 3600) {
-			val m = elapsedSeconds / 60
-			return m + " minute"
-		}
-		if(elapsedSeconds < 3600*24) {
-			val h = elapsedSeconds / 3600
-			return h + " hour"
-		}
-		val d = elapsedSeconds / (3600*24)
-		return d + " day"
-	}
 	
 /*
 // Some of this will go in view snippets

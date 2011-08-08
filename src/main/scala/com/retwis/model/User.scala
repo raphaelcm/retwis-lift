@@ -1,5 +1,6 @@
 package com.retwis.model
 
+import scala.collection.immutable.List
 import net.liftweb.http._
 import net.liftweb.http.provider._
 import _root_.redis.clients.jedis._
@@ -15,17 +16,22 @@ object User {
 	private val random = new SecureRandom();
 
 	//get last 50 users
-	def getLastUsers(): List[String] = {
+	def getLastUsers(): Array[User] = {
 		val jedis = Retwis.pool.getResource
 
 		try {
-			val sortParams = new SortingParams().desc.limit(0, 50).get("uid:*:username")
-			val usernameList = jedis.sort("global:users", sortParams)
-			// debugging
-			val debugIter = usernameList.toList.iterator
-			while(debugIter.hasNext) print(debugIter.next)
-			// end debugging
-			return usernameList.toList
+			val userIds = jedis.lrange("global:users", 0, 50)
+			var userArray = new Array[User](userIds.length)
+			var i = 0
+			for(id<-userIds) {
+				val username = jedis.get("uid:" + id + ":username")
+				println("getLastUsers DEBUG:" + id)
+				println("getLastUsers DEBUG:" + username)
+				userArray(i) = new User(id, username, "")
+				i += 1
+			}
+			println("getLastUsers DEBUG about to return " + userArray.toString)
+			return userArray
 		} catch {
 			case e => e.printStackTrace
 		} finally {
@@ -146,7 +152,7 @@ class User(id: String, username: String, password: String) {
 	def getPassword(): String = return password
 
 	//get all tweets belonging to user
-	def getAllTweets(): List[Tweet] = {
+	def getAllTweets(): Array[Tweet] = {
 		val jedis = Retwis.pool.getResource
 
 		try {
@@ -161,17 +167,18 @@ class User(id: String, username: String, password: String) {
 	}
 
 	//get N most recent tweets
-	def getNRecentTweets(n: Int): List[Tweet] = {
+	def getNRecentTweets(n: Int): Array[Tweet] = {
 		val jedis = Retwis.pool.getResource
 
 		try {
-			val postIdIter = jedis.lrange("uid:" + id + "posts", 0, n).iterator
-			var tweets: List[Tweet] = null
-			while(postIdIter.hasNext) {
-				val postId = postIdIter.next
+			val postIds = jedis.lrange("uid:" + id + "posts", 0, n)
+			var tweets = new Array[Tweet](postIds.length)
+			var i = 0
+			for(postId<-postIds) {
 				val postTime = jedis.get("pid:" + postId + "time")
 				val postMessage = jedis.get("pid:" + postId + "message")
-				tweets = tweets :+ new Tweet(postId, postTime.toLong, postMessage)
+				tweets(i) = new Tweet(postId, postTime.toLong, postMessage, username)
+				i += 1
 			}
 			return tweets
 		} catch {
@@ -188,11 +195,12 @@ class User(id: String, username: String, password: String) {
 
 		try {
 			val nextPostId = jedis.incr("global:nextPostId")
-			val setTimeResponse = jedis.set("pid:" + nextPostId.toString + ":time", Platform.currentTime.toString)
+			val setTimeResponse = jedis.set("pid:" + nextPostId + ":time", Platform.currentTime.toString)
 			val setMessageResponse = jedis.set("pid:" + nextPostId + ":message", message)
+			val setUsernameResponse = jedis.set("pid:" + nextPostId + ":username", username)
 			val setUserPostsResponse = jedis.rpush("uid:" + id + ":posts", nextPostId.toString)
-			if(setTimeResponse != "OK" || setMessageResponse != "OK" || setUserPostsResponse < 1)
-			throw new Exception("Response *not* OK. setTimeResponse=" + setTimeResponse + " setMessageResponse=" + setMessageResponse + " setUserPostsResponse=" + setUserPostsResponse)
+			if(setTimeResponse != "OK" || setMessageResponse != "OK" || setUsernameResponse != "OK" || setUserPostsResponse < 1)
+			throw new Exception("Response *not* OK. setTimeResponse=" + setTimeResponse + " setMessageResponse=" + setMessageResponse + " setUsernameResponse=" + setUsernameResponse + " setUserPostsResponse=" + setUserPostsResponse)
 		} catch {
 			case e => e.printStackTrace
 		} finally {
@@ -226,24 +234,26 @@ class User(id: String, username: String, password: String) {
 		}
 	}
 
-	//return a list of all followers
-	def getFollowers(): List[User] = {
+	//return an array of all followers
+	def getFollowers(): Array[User] = {
 		return this.getRelatedUsers("followers")
 	}
 
-	//return a list of all followees
-	def getFollowing(): List[User] = {
+	//return an array of all followees
+	def getFollowing(): Array[User] = {
 		return this.getRelatedUsers("following")
 	}
 
-	def getRelatedUsers(relation: String): List[User] = {
+	def getRelatedUsers(relation: String): Array[User] = {
 		val jedis = Retwis.pool.getResource
 
 		try {
-			val relatedIdIterator = jedis.smembers("uid:" + id + ":" + relation).iterator
-			var related: List[User] = null
-			while(relatedIdIterator.hasNext) {
-				related = related :+ new User(relatedIdIterator.next, jedis.get("uid:" + id + ":username"), "") //don't include password
+			val relatedIds = jedis.smembers("uid:" + id + ":" + relation)
+			var related = new Array[User](relatedIds.size)
+			var i = 0
+			for(id<-relatedIds) {
+				related(i) = new User(id, jedis.get("uid:" + id + ":username"), "") //don't include password
+				i += 1
 			}
 			return related
 		} catch {
