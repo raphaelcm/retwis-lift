@@ -23,8 +23,6 @@ object Retwis {
 		val d = elapsedSeconds / (3600*24)
 		return d + " day"
 	}
-
-
 	
 /*
 // Some of this will go in view snippets
@@ -128,20 +126,6 @@ function showUserPostsWithPagination($username,$userid,$start,$count,$includeFol
     }
     if ($nextlink || $prevlink)
         echo("<div class=\"rightlink\">$prevlink $nextlink</div>");
-}
-
-function showLastUsers() {
-    $r = redisLink();
-    $users = $r->sort("global:users", array('GET' => 'uid:*:username', 
-											'DESC' => 0,
-											'LIMIT' => array(0 => '0',
-															 1 => '10')));
-	
-    echo("<div>");
-	foreach($users as $u) {
-        echo("<a class=\"username\" href=\"profile.php?u=".urlencode($u)."\">".utf8entities($u)."</a> ");
-    }
-    echo("</div><br>");
 }
 
 function getAllUsers() {

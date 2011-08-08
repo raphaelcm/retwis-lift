@@ -5,15 +5,21 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
 	<title>Timeline</title>
-	
+
 </head>
 
 <body class="lift:content_id=main">
-<div id="main" class="lift:surround?with=default;at=content">
-	<h2>Global Timeline</h2>
-	<i>Latest registered users (an example of SORT command!)</i><br />
-
-	<i>Latest 50 messages from users around the world!</i><br />
+	<div id="main" class="lift:surround?with=default;at=content">
+		<h2>Global Timeline</h2>
+		<i>Latest registered users (an example of SORT command!)</i><br />
+		<div class="lift:Timeline.latestRegisteredUsers">
+		<lift:Timeline.latestRegisteredUsers />
+		</div>
+		<i>Latest 50 messages from users around the world!</i><br />
+		<div class="lift:Timeline.latestTweets">
+		<lift:Timeline.latestTweets />
+		</div>
+		
 </div>
 </body>
 </html>

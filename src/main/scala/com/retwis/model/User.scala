@@ -8,10 +8,31 @@ import compat.Platform
 import java.security.MessageDigest
 import java.security.SecureRandom
 import java.math.BigInteger
+import scala.collection.JavaConversions._
 
 //Static User methods
 object User {
 	private val random = new SecureRandom();
+
+	//get last 50 users
+	def getLastUsers(): List[String] = {
+		val jedis = Retwis.pool.getResource
+
+		try {
+			val sortParams = new SortingParams().desc.limit(0, 50).get("uid:*:username")
+			val usernameList = jedis.sort("global:users", sortParams)
+			// debugging
+			val debugIter = usernameList.toList.iterator
+			while(debugIter.hasNext) print(debugIter.next)
+			// end debugging
+			return usernameList.toList
+		} catch {
+			case e => e.printStackTrace
+		} finally {
+			Retwis.pool.returnResource(jedis)
+		}
+		return null
+	}
 
 	//return a random MD5 hash value (for session keys)
 	private def getRand(): String = {
@@ -29,6 +50,7 @@ object User {
 				jedis.set("username:" + username + ":uid", nextUserId.toString)
 				jedis.set("uid:" + nextUserId.toString + ":username", username)
 				jedis.set("uid:" + nextUserId.toString + ":password", password)
+				jedis.sadd("global:users", nextUserId.toString)
 				return true
 			} catch {
 				case e => e.printStackTrace

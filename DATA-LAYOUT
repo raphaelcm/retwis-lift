@@ -5,7 +5,7 @@ User data
 
 incr global:nextUserId => 1000
 
-username:antirez:id (the numeric ID of the user)
+username:antirez:uid (the numeric ID of the user)
 uid:1000:username (the username of the user)
 uid:1000:password (password of course)
 uid:1000:auth 9458sd893448dfd
