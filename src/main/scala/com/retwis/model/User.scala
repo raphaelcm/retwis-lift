@@ -25,12 +25,9 @@ object User {
 			var i = 0
 			for(id<-userIds) {
 				val username = jedis.get("uid:" + id + ":username")
-				println("getLastUsers DEBUG:" + id)
-				println("getLastUsers DEBUG:" + username)
 				userArray(i) = new User(id, username, "")
 				i += 1
 			}
-			println("getLastUsers DEBUG about to return " + userArray.toString)
 			return userArray
 		} catch {
 			case e => e.printStackTrace

@@ -10,14 +10,19 @@ object Tweet {
 		if(elapsedSeconds < 60) return elapsedSeconds + " seconds"
 		if(elapsedSeconds < 3600) {
 			val m = elapsedSeconds / 60
-			return m + " minute"
+			return pluralize(m, " minute")
 		}
 		if(elapsedSeconds < 3600*24) {
 			val h = elapsedSeconds / 3600
-			return h + " hour"
+			return pluralize(h, " hour")
 		}
 		val d = elapsedSeconds / (3600*24)
-		return d + " day"
+		return pluralize(d, " day")
+	}
+	
+	private def pluralize(i: Long, s: String): String = {
+		if(i>1) return i + s + "s"
+		return i + s
 	}
 	
 	//get Tweet object based on tweet id
@@ -49,7 +54,6 @@ object Tweet {
 			var tweets = new Array[Tweet](tweetIds.length)
 			var i = 0
 			for(id<-tweetIds) {
-				println("getLastTweets DEBUG:" + id)
 				tweets(i) = new Tweet(id, jedis.get("pid:" + id + ":time").toLong, jedis.get("pid:" + id + ":message"), jedis.get("pid:" + id + ":username"))
 				i += 1
 			}
