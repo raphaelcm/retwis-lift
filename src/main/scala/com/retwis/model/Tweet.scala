@@ -2,8 +2,21 @@ package com.retwis.model
 
 import scala.collection.JavaConversions._
 import compat.Platform
+import _root_.scala.xml.{NodeSeq, Text, Group, NodeBuffer}
 
 object Tweet {
+	//render Tweet HTML
+	def renderTweetHTML(username: String, message: String, time: Long) : NodeSeq = {
+		val elapsed = strElapsed(time)
+		<a id="user" href={ "user?u=" + username }>{username}</a>
+		<div class="post">{message}<br />
+	    <i>posted {elapsed} ago via web</i></div>
+	}
+	
+	def renderTweetHTML(tweet: Tweet) : NodeSeq = {
+		renderTweetHTML(tweet.getUsername, tweet.getMessage, tweet.getTime)
+	}
+	
 	//create a string showing the time elapsed
 	def strElapsed(time: Long): String = {
 		val elapsedSeconds = (Platform.currentTime - time) / 1000
@@ -27,7 +40,7 @@ object Tweet {
 	
 	//get Tweet object based on tweet id
 	def getTweet(id: String): Tweet = {
-		val jedis = Retwis.pool.getResource()
+		val jedis = RetwisDB.pool.getResource()
 		
 		try {
 			val time = jedis.get("pid:" + id + ":time")
@@ -39,7 +52,7 @@ object Tweet {
 		} catch {
 			case e => e.printStackTrace()
 		} finally {
-			Retwis.pool.returnResource(jedis)
+			RetwisDB.pool.returnResource(jedis)
 		}
 		
 		return null
@@ -47,7 +60,7 @@ object Tweet {
 	
 	//get last 50 tweets
 	def getLastTweets(): Array[Tweet] = {
-		val jedis = Retwis.pool.getResource
+		val jedis = RetwisDB.pool.getResource
 
 		try {
 			val tweetIds = jedis.lrange("global:timeline", 0, 50)
@@ -61,7 +74,7 @@ object Tweet {
 		} catch {
 			case e => e.printStackTrace
 		} finally {
-			Retwis.pool.returnResource(jedis)
+			RetwisDB.pool.returnResource(jedis)
 		}
 		return null
 	}

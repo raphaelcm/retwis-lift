@@ -17,8 +17,7 @@ class Timeline {
 		val result = new NodeBuffer
 		while(uIter.hasNext) {
 			val user = uIter.next
-			val uname = user.getUsername
-			result &+ (<a class="username" href={ "user?u=" + uname }>{uname}</a><br />)
+			result &+ User.renderUserHTML(user.getUsername)
 		}
 		result
 	}
@@ -28,13 +27,7 @@ class Timeline {
 		val result = new NodeBuffer
 		while(tIter.hasNext) {
 			val tweet = tIter.next
-			val tmsg = tweet.getMessage
-			val ttime = tweet.getTime
-			val tuser = tweet.getUsername
-			val elapsed = Tweet.strElapsed(ttime)
-			result &+ (<a id="user" href={ "user?u=" + tuser }>{tuser}</a>
-			<div class="post">{tmsg}<br />
-		    <i>posted {elapsed} ago via web</i></div>)
+			result &+ Tweet.renderTweetHTML(tweet)
 		}
 		result
 	}
