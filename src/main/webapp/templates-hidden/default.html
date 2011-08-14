@@ -48,7 +48,17 @@
 		background-color: #eee;
 	}
 
+	#lift__noticesContainer___notice {
+	    background-color: green;
+	}
 
+	#lift__noticesContainer___warning {
+	    background-color: yellow;
+	}
+
+	#lift__noticesContainer___error {
+	    background-color: red;
+	}
 	/* ]]> */
 	</style>
 </head>
@@ -57,9 +67,20 @@
 		<div class="column span-12 last" style="">
 			<h1 class="alt"><img style="border:none" src="/images/logo.png" width="192" height="85" alt="Retwis-Lift" /><img alt="" id="ajax-loader" style="display:none; margin-bottom: 0px; margin-left: 5px" src="/images/ajax-loader.gif" /></h1>
 		</div>
-		<div id="headerlinks">
-			<lift:Header.headerLinks />
-		</div>
+			<div id="navbar">
+			<a href="index">home</a>
+			| <a href="timeline">timeline</a>
+			<lift:test_cond.loggedin>
+			<span id="logoutlink">| <a href="logout">logout</a></span>
+		</lift:test_cond.loggedin>
+			<br /><div class="ui-widget">
+					<form name="input" action="user" method="get">
+					<label for="usersearch">User Search: </label>
+					<input id="usersearch" type="text" name="u" />
+					<input type="submit" />
+					</form>
+				</div>
+			</div>
 
 		<hr />
 

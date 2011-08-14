@@ -1,4 +1,4 @@
-package com.retwis.model
+package com.retwis.util
 
 import _root_.redis.clients.jedis._
 import scala.collection.JavaConversions._

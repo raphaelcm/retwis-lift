@@ -1,5 +1,6 @@
 package com.retwis.model
 
+import com.retwis.util._
 import scala.collection.JavaConversions._
 import compat.Platform
 import _root_.scala.xml.{NodeSeq, Text, Group, NodeBuffer}

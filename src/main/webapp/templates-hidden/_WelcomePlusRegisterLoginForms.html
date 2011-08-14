@@ -1,0 +1,42 @@
+<lift:children>
+	<div id="welcometext"> 
+		Hello! Retwis is a very simple clone of <a href="http://twitter.com">Twitter</a>, as a demo for the <a href="http://redis.io/">Redis</a> key-value database. Key points:
+		<ul> 
+			<li>Redis is a key-value DB, and it is <b>the only DB used</b> by this application, no MySQL or alike at all.</li> 
+			<li>This application can scale horizontally since there is no point where the whole dataset is needed at the same point. With consistent hashing (not implemented in the demo to make it simpler) different keys can be stored in different servers.</li> 
+			<li>The source code of this application is available <a href="http://github.com/raphaelcm/retwis-lift">here</a>.</li>
+			<li>Originally, <a href="http://redis.io/topics/twitter-clone">Retwis</a> was a very simple Twitter clone written in PHP.</li> 
+			<li>This modified version, Retwis-lift, has been rewritten in Scala/Lift and uses Jedis to communicate with the Redis DB.</li>
+		</ul> 
+	</div>
+	<hr class="space" />
+	<div id="registerbox">
+		<h2>Register!</h2>
+		<b>Want to try Retwis? Create an account!</b>
+		<lift:IndexPage.register form="POST">
+		<table>
+			<tr>
+				<td>Username</td><td><register:username /><lift:msg id="usernameReg"/></td>
+			</tr>
+			<tr>
+				<td>Password</td><td><register:password /><lift:msg id="passwordReg"/></td>
+			</tr>
+			<tr>
+				<td>Password (again)</td><td><register:passwordRepeat /><lift:msg id="passwordRepeat"/></td>
+			</tr>
+			<tr>
+				<td colspan="2" align="right"><register:submit /></td></tr>
+			</table>
+		</lift:IndexPage.register>
+		<h2>Already registered? Login here</h2>
+		<lift:IndexPage.login form="POST">
+		<table><tr>
+			<td>Username</td><td><login:username /><lift:msg id="usernameLogin"/></td>
+		</tr><tr>
+			<td>Password</td><td><login:password /><lift:msg id="passwordLogin"/></td>
+		</tr><tr>
+			<td colspan="2" align="right"><login:submit /></td>
+		</tr></table>
+		</lift:IndexPage.login>
+	</div>
+</lift:children>

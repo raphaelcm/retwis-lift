@@ -1,5 +1,6 @@
 package com.retwis.model
 
+import com.retwis.util._
 import scala.collection.immutable.List
 import net.liftweb.http._
 import net.liftweb.http.provider._
@@ -15,6 +16,7 @@ import _root_.scala.xml.{NodeSeq, Text, Group, NodeBuffer}
 //Static User methods
 object User {
 	private val random = new SecureRandom();
+	object auth extends SessionVar[String]("LoggedOut")
 
 	//render User HTML
 	def renderUserHTML(username: String): NodeSeq = {
@@ -73,14 +75,48 @@ object User {
 	//return TRUE and set AUTH hash if login info is value, otherwise return FALSE
 	def login(username: String, password: String): Boolean = {
 		val jedis = RetwisDB.pool.getResource()
+		println("User.login: 1")
 		try {
+		println("User.login: 2")
 			val userid = jedis.get("username:" + username + ":uid")
+			println("User.login: 3")
 			if(userid != null && password == jedis.get("uid:" + userid + ":password")) {
+			println("User.login: 4")
 				val authToken = getRand()
 				jedis.set("uid:" + userid + ":auth", authToken)
 				jedis.set("auth:" + authToken, userid)
+				println("User.login: 5.  authToken=" + authToken)
+				/*
 				val cookie = HTTPCookie("auth", authToken)
 				S.addCookie(cookie)
+				*/
+				auth.set(authToken)
+				return true
+			}
+		} catch {
+			case e => e.printStackTrace()
+		} finally {
+			RetwisDB.pool.returnResource(jedis)
+		}
+		return false
+	}
+
+	def logout(username: String, password: String): Boolean = {
+		val jedis = RetwisDB.pool.getResource()
+		println("User.logout: 1")
+		try {
+		println("User.logout: 2")
+			val userid = jedis.get("username:" + username + ":uid")
+			println("User.logout: 3")
+			if(userid != null && password == jedis.get("uid:" + userid + ":password")) {
+			println("User.logout: 4")
+				jedis.del("uid:" + userid + ":auth", auth.is)
+				jedis.del("auth:" + auth.is, userid)
+				/*
+				val cookie = HTTPCookie("auth", authToken)
+				S.addCookie(cookie)
+				*/
+				auth.set("Logged Out")
 				return true
 			}
 		} catch {
@@ -94,21 +130,21 @@ object User {
 	//return TRUE if logged in
 	def isLoggedIn(): Boolean = {
 		val jedis = RetwisDB.pool.getResource()
-		val authCookie = S.findCookie("auth")
+		//val authCookie = S.findCookie("auth")
 		var retVal = false
 
-		if(!authCookie.isEmpty) {
-			try {
-				val auth = authCookie.openTheBox.value.openTheBox //this seems awfully complicated
-				val userid = jedis.get("auth:" + auth)
-				if(userid != null && jedis.get("uid:" + userid + ":auth") == auth) {
-					retVal = true
-				}
-			} catch {
-				case e => e.printStackTrace()
-			} finally {
-				RetwisDB.pool.returnResource(jedis)
+		try {
+			println("User.isLoggedin: 1")
+			val userid = jedis.get("auth:" + auth.is)
+			println("User.isLoggedin: 2")
+			if(userid != null && jedis.get("uid:" + userid + ":auth") == auth.is) {
+				println("User.isLoggedin: 3")
+				retVal = true
 			}
+		} catch {
+			case e => e.printStackTrace()
+		} finally {
+			RetwisDB.pool.returnResource(jedis)
 		}
 		return retVal
 	}
@@ -116,12 +152,12 @@ object User {
 	//get User object representing the logged in user
 	def getLoggedInUser(): User = {
 		val jedis = RetwisDB.pool.getResource()
-		val authCookie = S.findCookie("auth")
+		//val authCookie = S.findCookie("auth")
 		
 		if(isLoggedIn) {
 			try {
-				val auth = authCookie.openTheBox.value.openTheBox //this seems awfully complicated
-				val userid = jedis.get("auth:" + auth)
+				//val auth = authCookie.openTheBox.value.openTheBox //this seems awfully complicated
+				val userid = jedis.get("auth:" + auth.is)
 				return getUserById(userid)
 			} catch {
 				case e => e.printStackTrace()

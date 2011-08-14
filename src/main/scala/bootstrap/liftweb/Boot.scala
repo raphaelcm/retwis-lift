@@ -1,6 +1,7 @@
 
 package bootstrap.liftweb
 
+import com.retwis.model._
 import net.liftweb._
 import util._
 import Helpers._
@@ -48,6 +49,13 @@ class Boot {
 
     // Force the request to be UTF-8
     LiftRules.early.append(_.setCharacterEncoding("UTF-8"))
+
+	//Logged in/out test
+	LiftRules.loggedInTest = Full( 
+	  () => {
+	    	User.isLoggedIn()
+	  }
+	)
 
     // Use HTML5 for rendering
 /* //commented out so I can use mixed case in my snippets

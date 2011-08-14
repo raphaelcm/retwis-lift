@@ -11,7 +11,7 @@ import util._
 import Helpers._
 import _root_.scala.xml.{NodeSeq, Text, Group, NodeBuffer}
 
-class Timeline {
+class TimelinePage {
 	def latestRegisteredUsers (content : NodeSeq) : NodeSeq = {
 		val uIter = User.getLastUsers.iterator
 		val result = new NodeBuffer
@@ -24,7 +24,7 @@ class Timeline {
 
 	def latestTweets (content : NodeSeq) : NodeSeq = {
 		val tIter = Tweet.getLastTweets.iterator
-		val result = new NodeBuffer
+		var result = new NodeBuffer
 		while(tIter.hasNext) {
 			val tweet = tIter.next
 			result &+ Tweet.renderTweetHTML(tweet)
