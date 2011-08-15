@@ -36,6 +36,7 @@ class UserPage {
 		result
 	}
 
+	/* Fix This */
 	def followButton (content : NodeSeq) : NodeSeq = {
 		val result = new NodeBuffer
 		val userBox = S.param("u")

@@ -1,26 +1,28 @@
 <lift:children>
 	<div id="postform"> 
-		<lift:IndexPage.post form="POST"> 
-		<post:username />, what you are doing?
-		<br> 
-		<table> 
-			<tr><td><post:updateInput /><textarea cols="70" rows="3" name="status"></textarea></td></tr> 
-			<tr><td align="right"><post:submit /></td></tr> 
-		</table> 
-	</lift:IndexPage.post>
+		<lift:TweetSnippet.post form="POST"> 
+			<lift:UserSnippet.user />, what you are doing?
+			<br /> 
+			<table> 
+				<tr><td><post:postText /><textarea cols="70" rows="3" name="status"></textarea></td></tr> 
+				<tr><td align="right"><post:submit /></td></tr> 
+			</table> 
+		</lift:TweetSnippet.post>
 	<div id="homeinfobox"> 
-		<lift:IndexPage.followers />
-		1 followers<br />
-		2 following<br /> 
+		<lift:UserSnippet.followinfo>
+		<follow.followers /> followers<br />
+		<follow.following /> following<br />
+		</lift:UserSnippet.followinfo>
 	</div> 
 </div> 
 <div id="timelineHeader"> 
 	<h2>Timeline: You and People You Follow</h2> 
 </div>
-<IndexPage.latestTweets />
+<UserSnippet.latestTweets>
 <div class="post">
-	<a class="username" href="profile.php?u=skye">skye</a>
-	looks like there's a bug with escaped characters...will fix tonite<br>
-	<i>posted 17 days ago via web</i>
+	<latestTweets.tweetAuthorLink>
+	<latestTweets.tweet<br />
+	<i><latestTweets.tweetTimeElapsed></i>
 </div>
+</UserSnippet.latestTweets>
 </lift:children>
