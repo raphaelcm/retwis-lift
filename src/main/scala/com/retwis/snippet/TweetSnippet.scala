@@ -31,7 +31,7 @@ class TweetSnippet {
 		}
 
 		bind("post", xhtml,
-			"postText" -> SHtml.text(username.is, username(_)),
-			"submit" -> SHtml.submit("Login", processPost))
+			"postText" -> SHtml.textarea(postText.is, postText(_)),
+			"submit" -> SHtml.submit("Update", processPost))
 	}
 }

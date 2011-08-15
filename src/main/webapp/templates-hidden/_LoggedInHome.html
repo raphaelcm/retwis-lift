@@ -1,28 +1,29 @@
 <lift:children>
-	<div id="postform"> 
-		<lift:TweetSnippet.post form="POST"> 
-			<lift:UserSnippet.user />, what you are doing?
-			<br /> 
-			<table> 
-				<tr><td><post:postText /><textarea cols="70" rows="3" name="status"></textarea></td></tr> 
-				<tr><td align="right"><post:submit /></td></tr> 
-			</table> 
-		</lift:TweetSnippet.post>
-	<div id="homeinfobox"> 
-		<lift:UserSnippet.followinfo>
-		<follow.followers /> followers<br />
-		<follow.following /> following<br />
-		</lift:UserSnippet.followinfo>
-	</div> 
+<div id="postform"> 
+	<lift:TweetSnippet.post form="POST"> 
+	<lift:UserSnippet.username />, what you are doing?
+	<br /> 
+	<table> 
+		<tr><td><post:postText /></td></tr> 
+		<tr><td align="right"><post:submit /></td></tr> 
+	</table> 
+	</lift:TweetSnippet.post>
+<div id="homeinfobox">
+	<lift:UserSnippet.followInfo> 
+	<followInfo:followers /> followers<br />
+	<followInfo:following /> following<br />
+	</lift:UserSnippet.followInfo>
+</div> 
 </div> 
 <div id="timelineHeader"> 
-	<h2>Timeline: You and People You Follow</h2> 
+	<h2>Your latest tweets:</h2> 
 </div>
-<UserSnippet.latestTweets>
+<lift:UserSnippet.latestTweets >
 <div class="post">
-	<latestTweets.tweetAuthorLink>
-	<latestTweets.tweet<br />
-	<i><latestTweets.tweetTimeElapsed></i>
+	<latestTweets:usertimeline>
+	<usertimeline.tweet /><br />
+	<i><usertimeline.time /></i>
+	</latestTweets:usertimeline>
 </div>
-</UserSnippet.latestTweets>
+</lift:UserSnippet.latestTweets>
 </lift:children>

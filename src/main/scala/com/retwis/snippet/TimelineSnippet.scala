@@ -11,7 +11,7 @@ import util._
 import Helpers._
 import _root_.scala.xml.{NodeSeq, Text, Group, NodeBuffer}
 
-class TimelinePage {
+class TimelineSnippet {
 	def latestRegisteredUsers (content : NodeSeq) : NodeSeq = {
 		val uIter = User.getLastUsers.iterator
 		val result = new NodeBuffer

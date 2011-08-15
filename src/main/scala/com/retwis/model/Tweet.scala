@@ -11,13 +11,13 @@ object Tweet {
 		val elapsed = strElapsed(time)
 		<a id="user" href={ "user?u=" + username }>{username}</a>
 		<div class="post">{message}<br />
-	    <i>posted {elapsed} ago via web</i></div>
+		<i>posted {elapsed} ago via web</i></div>
 	}
-	
+
 	def renderTweetHTML(tweet: Tweet) : NodeSeq = {
 		renderTweetHTML(tweet.getUsername, tweet.getMessage, tweet.getTime)
 	}
-	
+
 	//create a string showing the time elapsed
 	def strElapsed(time: Long): String = {
 		val elapsedSeconds = (Platform.currentTime - time) / 1000
@@ -33,16 +33,16 @@ object Tweet {
 		val d = elapsedSeconds / (3600*24)
 		return pluralize(d, " day")
 	}
-	
+
 	private def pluralize(i: Long, s: String): String = {
 		if(i>1) return i + s + "s"
 		return i + s
 	}
-	
+
 	//get Tweet object based on tweet id
 	def getTweet(id: String): Tweet = {
 		val jedis = RetwisDB.pool.getResource()
-		
+
 		try {
 			val time = jedis.get("pid:" + id + ":time")
 			val message = jedis.get("pid:" + id + ":message")
@@ -55,10 +55,10 @@ object Tweet {
 		} finally {
 			RetwisDB.pool.returnResource(jedis)
 		}
-		
+
 		return null
 	}
-	
+
 	//get last 50 tweets
 	def getLastTweets(): Array[Tweet] = {
 		val jedis = RetwisDB.pool.getResource
