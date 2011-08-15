@@ -61,7 +61,7 @@ object User {
 				jedis.set("username:" + username + ":uid", nextUserId.toString)
 				jedis.set("uid:" + nextUserId.toString + ":username", username)
 				jedis.set("uid:" + nextUserId.toString + ":password", password)
-				jedis.sadd("global:users", nextUserId.toString)
+				jedis.lpush("global:users", nextUserId.toString)
 				return true
 			} catch {
 				case e => e.printStackTrace
@@ -92,11 +92,11 @@ object User {
 		return false
 	}
 
-	def logout(username: String, password: String): Boolean = {
+	def logout(): Boolean = {
 		val jedis = RetwisDB.pool.getResource()
 		try {
-			val userid = jedis.get("username:" + username + ":uid")
-			if(userid != null && password == jedis.get("uid:" + userid + ":password")) {
+			val userid = jedis.get("auth:" + auth.is)
+			if(userid != null) {
 				jedis.del("uid:" + userid + ":auth", auth.is)
 				jedis.del("auth:" + auth.is, userid)
 				auth.set("Logged Out")
@@ -216,7 +216,7 @@ class User(id: String, username: String, password: String) {
 				val postTime = jedis.get("pid:" + postId + ":time")
 				val postMessage = jedis.get("pid:" + postId + ":message")
 				tweets(i) = new Tweet(postId, postTime.toLong, postMessage, username)
-				i += 1
+				i = i + 1
 			}
 			return tweets
 		} catch {
@@ -233,12 +233,10 @@ class User(id: String, username: String, password: String) {
 
 		try {
 			val nextPostId = jedis.incr("global:nextPostId")
-			val setTimeResponse = jedis.set("pid:" + nextPostId + ":time", Platform.currentTime.toString)
-			val setMessageResponse = jedis.set("pid:" + nextPostId + ":message", message)
-			val setUsernameResponse = jedis.set("pid:" + nextPostId + ":username", username)
-			val setUserPostsResponse = jedis.rpush("uid:" + id + ":posts", nextPostId.toString)
-			if(setTimeResponse != "OK" || setMessageResponse != "OK" || setUsernameResponse != "OK" || setUserPostsResponse < 1)
-			throw new Exception("Response *not* OK. setTimeResponse=" + setTimeResponse + " setMessageResponse=" + setMessageResponse + " setUsernameResponse=" + setUsernameResponse + " setUserPostsResponse=" + setUserPostsResponse)
+			jedis.set("pid:" + nextPostId + ":time", Platform.currentTime.toString)
+			jedis.set("pid:" + nextPostId + ":message", message)
+			jedis.lpush("global:timeline", nextPostId.toString)
+			jedis.rpush("uid:" + id + ":posts", nextPostId.toString)
 		} catch {
 			case e => e.printStackTrace
 		} finally {
@@ -252,6 +250,20 @@ class User(id: String, username: String, password: String) {
 
 		try {
 			jedis.sadd("uid:" + id + ":following", followeeId)
+		} catch {
+			case e => e.printStackTrace
+		} finally {
+			RetwisDB.pool.returnResource(jedis)
+		}
+	}
+	
+	//follow user by username
+	def followUsername(followeeName: String) = {
+		val jedis = RetwisDB.pool.getResource
+
+		try {
+			val uid = jedis.get("username:" + followeeName + ":uid")
+			this.follow(uid)
 		} catch {
 			case e => e.printStackTrace
 		} finally {

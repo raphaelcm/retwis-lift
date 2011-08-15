@@ -71,8 +71,8 @@
 			<a href="index">home</a>
 			| <a href="timeline">timeline</a>
 			<lift:test_cond.loggedin>
-			<span id="logoutlink">| <a href="logout">logout</a></span>
-		</lift:test_cond.loggedin>
+			| <lift:IndexPage.logout><logout:logoutButton /></lift:IndexPage.logout>
+			</lift:test_cond.loggedin>
 			<br /><div class="ui-widget">
 					<form name="input" action="user" method="get">
 					<label for="usersearch">User Search: </label>

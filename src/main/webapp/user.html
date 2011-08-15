@@ -10,15 +10,17 @@
 
 <body class="lift:content_id=main">
 	<div id="main" class="lift:surround?with=default;at=content">
-		<div class="lift:UserPage.userTitle">
+		<div class="lift:UserSnippet.userTitle">
 		<lift:UserSnippet.userTitle />
 		</div>
-		<div class="lift:UserPage.userPosts">
+		<div class="lift:UserSnippet.userPosts">
 		<lift:UserSnippet.userPosts />
 		</div>
-		<div class="lift:UserPage.followButton">
-		<lift:UserSnippet.followButton />
+		<lift:FollowSnippet.followButton>
+		<div class="followButton">
+			<follow:button />
 		</div>
+		</lift:FollowSnippet.followButton>
 	</div>
 </body>
 </html>

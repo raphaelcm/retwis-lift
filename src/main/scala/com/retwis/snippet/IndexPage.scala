@@ -39,7 +39,19 @@ class IndexPage {
 			"password" -> SHtml.password(password, password = _),
 			"submit" -> SHtml.submit("Login", processLogin))
 	}
-	
+
+	def logout(xhtml : NodeSeq) : NodeSeq = {
+		def processLogout () {
+			User.logout
+		}
+
+		val logout = new NodeBuffer &+ "logout"
+
+		bind("logout", xhtml,
+			//"logoutButton" -> SHtml.submit("Logout", processLogout))
+			"logoutButton" -> SHtml.link("index", processLogout, logout))
+	}
+
 	def register(xhtml : NodeSeq) : NodeSeq = {
 		var password = ""
 		var passwordRepeat = ""

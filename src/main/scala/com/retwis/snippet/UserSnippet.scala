@@ -45,29 +45,16 @@ class UserSnippet {
 		val u = User.getLoggedInUser
 		val followerCount = u.getFollowers.length
 		val followingCount = u.getFollowing.length
-			bind("followInfo", xhtml,
-				"followers" -> followerCount.toString,
-				"following" -> followingCount.toString)
-	}
-
-	  def latestTweets( xhtml: NodeSeq ) : NodeSeq = {
-	    val latestTweets = User.getLoggedInUser.getNRecentTweets(20).elements.toList
-	    def bindTweets(template: NodeSeq): NodeSeq = {
-	      latestTweets.flatMap{ case (t) => bind("usertimeline", template,"tweet" -> t.getMessage,"time" -> Tweet.strElapsed(t.getTime))}
-	    }
-	    bind("usertimeline",xhtml, "name" -> User.getLoggedInUser.getUsername, "tweets" -> bindTweets _)
-	  }
-
-	/* Fix This */
-	def followButton (xhtml : NodeSeq) : NodeSeq = {
-		val result = new NodeBuffer
-		val userBox = S.param("u")
-		if(!userBox.isEmpty && User.isLoggedIn()) {
-			val uid = userBox.openTheBox
-			val user = User.getLoggedInUser
-			if(user isFollowing uid) result &+ <a href={"follow?u=" + uid} class="button">Follow this user</a>
-			else result &+ <a href={"follow?u=" + uid} class="button">Stop following</a>
+		bind("followInfo", xhtml,
+			"followers" -> followerCount.toString,
+			"following" -> followingCount.toString)
 		}
-		result
+
+		def latestTweets( xhtml: NodeSeq ) : NodeSeq = {
+			val latestTweets = User.getLoggedInUser.getNRecentTweets(20).elements.toList
+			def bindTweets(template: NodeSeq): NodeSeq = {
+				latestTweets.flatMap{ t => bind("usertimeline", template, "tweet" -> t.getMessage, "time" -> Tweet.strElapsed(t.getTime))}
+			}
+			bind("latestTweets", xhtml, "usertimeline" -> bindTweets _)
+		}
 	}
-}

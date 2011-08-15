@@ -13,11 +13,14 @@ import _root_.scala.xml.{NodeSeq, Text, Group, NodeBuffer}
 
 class TimelineSnippet {
 	def latestRegisteredUsers (content : NodeSeq) : NodeSeq = {
-		val uIter = User.getLastUsers.iterator
 		val result = new NodeBuffer
-		while(uIter.hasNext) {
-			val user = uIter.next
-			result &+ User.renderUserHTML(user.getUsername)
+		val usrs = User.getLastUsers
+		if(usrs != null) {
+			val uIter = usrs.iterator
+			while(uIter.hasNext) {
+				val user = uIter.next
+				result &+ User.renderUserHTML(user.getUsername)
+			}	
 		}
 		result
 	}

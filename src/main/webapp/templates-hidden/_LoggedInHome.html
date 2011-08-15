@@ -19,11 +19,11 @@
 	<h2>Your latest tweets:</h2> 
 </div>
 <lift:UserSnippet.latestTweets >
-<div class="post">
 	<latestTweets:usertimeline>
-	<usertimeline.tweet /><br />
-	<i><usertimeline.time /></i>
+	<div class="post">
+	<p><usertimeline:tweet /><br />
+	<i>posted <usertimeline:time /> ago</i></p>
+	</div>
 	</latestTweets:usertimeline>
-</div>
 </lift:UserSnippet.latestTweets>
 </lift:children>
