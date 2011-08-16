@@ -24,18 +24,6 @@ class UserSnippet {
 		result
 	}
 
-	def userPosts (xhtml : NodeSeq) : NodeSeq = {
-		val result = new NodeBuffer
-		val userBox = S.param("u")
-		if(!userBox.isEmpty) {
-			val u = User.getUserByName(userBox.openTheBox)
-			val tweets = u.getNRecentTweets(10)
-			println("tweets is " + tweets.length + " long.")
-			for(i <- 0 until tweets.length) result &+ Tweet.renderTweetHTML(tweets(i))
-		}
-		result
-	}
-
 	def username (xhtml : NodeSeq) : NodeSeq = {
 		val result = new NodeBuffer &+ User.getLoggedInUser.getUsername
 		result
@@ -49,12 +37,4 @@ class UserSnippet {
 			"followers" -> followerCount.toString,
 			"following" -> followingCount.toString)
 		}
-
-		def latestTweets( xhtml: NodeSeq ) : NodeSeq = {
-			val latestTweets = User.getLoggedInUser.getNRecentTweets(20).elements.toList
-			def bindTweets(template: NodeSeq): NodeSeq = {
-				latestTweets.flatMap{ t => bind("usertimeline", template, "tweet" -> t.getMessage, "time" -> Tweet.strElapsed(t.getTime))}
-			}
-			bind("latestTweets", xhtml, "usertimeline" -> bindTweets _)
-		}
-	}
+}

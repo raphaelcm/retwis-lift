@@ -7,6 +7,7 @@ import _root_.scala.xml.{NodeSeq, Text, Group, NodeBuffer}
 
 object Tweet {
 	//render Tweet HTML
+	/* delete this
 	def renderTweetHTML(username: String, message: String, time: Long) : NodeSeq = {
 		val elapsed = strElapsed(time)
 		<a id="user" href={ "user?u=" + username }>{username}</a>
@@ -17,6 +18,7 @@ object Tweet {
 	def renderTweetHTML(tweet: Tweet) : NodeSeq = {
 		renderTweetHTML(tweet.getUsername, tweet.getMessage, tweet.getTime)
 	}
+*/
 
 	//create a string showing the time elapsed
 	def strElapsed(time: Long): String = {
@@ -46,9 +48,9 @@ object Tweet {
 		try {
 			val time = jedis.get("pid:" + id + ":time")
 			val message = jedis.get("pid:" + id + ":message")
-			val username = jedis.get("pid:" + id + ":username")
+			val authorId = jedis.get("pid:" + id + ":uid")
 			if (time != null && message != null) {
-				return new Tweet(id, time.toLong, message, username)
+				return new Tweet(id, time.toLong, message, authorId)
 			}
 		} catch {
 			case e => e.printStackTrace()
@@ -68,7 +70,7 @@ object Tweet {
 			var tweets = new Array[Tweet](tweetIds.length)
 			var i = 0
 			for(id<-tweetIds) {
-				tweets(i) = new Tweet(id, jedis.get("pid:" + id + ":time").toLong, jedis.get("pid:" + id + ":message"), jedis.get("pid:" + id + ":username"))
+				tweets(i) = new Tweet(id, jedis.get("pid:" + id + ":time").toLong, jedis.get("pid:" + id + ":message"), jedis.get("pid:" + id + ":uid"))
 				i += 1
 			}
 			return tweets
@@ -81,10 +83,15 @@ object Tweet {
 	}
 }
 
-class Tweet(id: String, time: Long, message: String, username: String) {
+class Tweet(id: String, time: Long, message: String, authorId: String) {
 	/* Getters */
 	def getId(): String = return id
 	def getTime(): Long = return time
 	def getMessage(): String = return message
-	def getUsername(): String = return username
+	def getAuthorId(): String = return authorId
+	
+	def getAuthorLink(): NodeSeq = {
+		val username = User.getUserById(authorId).getUsername
+		return User.renderUserHTML(username)
+	}
 }

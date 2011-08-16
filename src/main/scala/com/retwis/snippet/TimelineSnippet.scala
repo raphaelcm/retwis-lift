@@ -25,13 +25,29 @@ class TimelineSnippet {
 		result
 	}
 
-	def latestTweets (content : NodeSeq) : NodeSeq = {
-		val tIter = Tweet.getLastTweets.iterator
-		var result = new NodeBuffer
-		while(tIter.hasNext) {
-			val tweet = tIter.next
-			result &+ Tweet.renderTweetHTML(tweet)
+	def getGlobalTimeline(xhtml: NodeSeq) : NodeSeq = {
+		latestTweets(null, xhtml)
+	}
+
+	def getPersonalTimeline(xhtml: NodeSeq) : NodeSeq = {
+		latestTweets(User.getLoggedInUser, xhtml)
+	}
+
+	def getUserTimeline(xhtml: NodeSeq) : NodeSeq = {
+		val userBox = S.param("u")
+		if(!userBox.isEmpty)
+			latestTweets(User.getUserByName(userBox.openTheBox), xhtml)
+		else
+			xhtml
+	}
+
+	def latestTweets (u: User, xhtml: NodeSeq) : NodeSeq = {
+		var latestTweets:List[Tweet] = Nil
+		if(u != null) latestTweets = u.getNRecentTweets(20).elements.toList
+		else latestTweets = Tweet.getLastTweets.toList
+		def bindTweets(template: NodeSeq): NodeSeq = {
+			latestTweets.flatMap{ t => bind("post", template, "authorlink" -> t.getAuthorLink, "message" -> t.getMessage, "elapsedtime" -> Tweet.strElapsed(t.getTime))}
 		}
-		result
+		bind("latestTweets", xhtml, "timeline" -> bindTweets _)
 	}
 }

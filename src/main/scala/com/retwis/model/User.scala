@@ -212,7 +212,7 @@ class User(id: String, username: String, password: String) {
 			for(postId<-postIds) {
 				val postTime = jedis.get("pid:" + postId + ":time")
 				val postMessage = jedis.get("pid:" + postId + ":message")
-				tweets(i) = new Tweet(postId, postTime.toLong, postMessage, username)
+				tweets(i) = new Tweet(postId, postTime.toLong, postMessage, id)
 				i += 1
 			}
 			return tweets
@@ -232,6 +232,7 @@ class User(id: String, username: String, password: String) {
 			val nextPostId = jedis.incr("global:nextPostId")
 			jedis.set("pid:" + nextPostId + ":time", Platform.currentTime.toString)
 			jedis.set("pid:" + nextPostId + ":message", message)
+			jedis.set("pid:" + nextPostId + ":uid", id)
 			jedis.lpush("global:timeline", nextPostId.toString)
 			jedis.lpush("uid:" + id + ":posts", nextPostId.toString)
 		} catch {

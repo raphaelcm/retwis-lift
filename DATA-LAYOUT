@@ -20,7 +20,7 @@ UPDATES
 incr global:nextPostId => 134
 pid:134:time => time (in mills)
 pid:134:message => message
-pid:134:username => name of poster
+pid:134:uid => uid of author
 
 TIMELINE
 

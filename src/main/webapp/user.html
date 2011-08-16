@@ -13,9 +13,11 @@
 		<div class="lift:UserSnippet.userTitle">
 		<lift:UserSnippet.userTitle />
 		</div>
-		<div class="lift:UserSnippet.userPosts">
-		<lift:UserSnippet.userPosts />
-		</div>
+		<lift:TimelineSnippet.getUserTimeline >
+			<latestTweets:timeline>
+				<div class="post"><post:authorlink /> <post:message /><br /><i>posted <post:elapsedtime /> ago via web</i></div>
+			</latestTweets:timeline>
+		</lift:TimelineSnippet.getUserTimeline >
 		<lift:FollowSnippet.followButton>
 		<div class="followButton">
 			<follow:button />

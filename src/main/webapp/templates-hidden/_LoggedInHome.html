@@ -18,12 +18,9 @@
 <div id="timelineHeader"> 
 	<h2>Your latest tweets:</h2> 
 </div>
-<lift:UserSnippet.latestTweets >
-	<latestTweets:usertimeline>
-	<div class="post">
-	<p><usertimeline:tweet /><br />
-	<i>posted <usertimeline:time /> ago</i></p>
-	</div>
-	</latestTweets:usertimeline>
-</lift:UserSnippet.latestTweets>
+<lift:TimelineSnippet.getPersonalTimeline >
+	<latestTweets:timeline>
+		<div class="post"><post:authorlink /> <post:message /><br /><i>posted <post:elapsedtime /> ago via web</i></div>
+	</latestTweets:timeline>
+</lift:TimelineSnippet.getPersonalTimeline >
 </lift:children>
