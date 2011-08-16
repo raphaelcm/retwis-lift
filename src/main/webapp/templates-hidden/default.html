@@ -4,97 +4,34 @@
 	<meta name="description" content="" />
 	<meta name="keywords" content="" />
 	<title class="lift:Menu.title">Retwis-Lift: </title>
-	<style class="lift:CSS.blueprint"></style>
-	<style class="lift:CSS.fancyType"></style>
+	<link href="static/style.css" rel="stylesheet" type="text/css" />
 	<script id="jquery" src="/classpath/jquery.js" type="text/javascript"></script>
 	<script id="json" src="/classpath/json.js" type="text/javascript"></script>
-	<style type="text/css">
-	/* <![CDATA[ */
-	.edit_error_class {
-		display: block;
-		color: red;
-	}
-
-	.sidebar ul {
-		margin:0;
-		padding:0;
-		border-bottom:1px solid #ccc;
-	}
-
-
-	.sidebar ul li {
-		margin:0;
-		padding:0;
-		list-style:none;
-		border:1px solid #ccc;
-		border-bottom:none;
-	}
-
-	.sidebar ul li a {
-		display:block;
-		padding:3px;
-		text-indent:30px;
-		text-decoration:none;
-	}
-
-	.sidebar ul li span {
-		display:block;
-		padding:3px;
-		text-indent:30px;
-		text-decoration:none;
-	}
-
-	.sidebar ul li a:hover {
-		background-color: #eee;
-	}
-
-	#lift__noticesContainer___notice {
-	    background-color: green;
-	}
-
-	#lift__noticesContainer___warning {
-	    background-color: yellow;
-	}
-
-	#lift__noticesContainer___error {
-	    background-color: red;
-	}
-	/* ]]> */
-	</style>
 </head>
 <body>
-	<div class="container">
-		<div class="column span-12 last" style="">
-			<h1 class="alt"><img style="border:none" src="/images/logo.png" width="192" height="85" alt="Retwis-Lift" /><img alt="" id="ajax-loader" style="display:none; margin-bottom: 0px; margin-left: 5px" src="/images/ajax-loader.gif" /></h1>
-		</div>
+	<div id="page">
+		<div id="header">
+			<a href="./"><img style="border:none" src="images/logo.png" width="192" height="85" alt="Retwis" /></a>
 			<div id="navbar">
-			<a href="index">home</a>
-			| <a href="timeline">timeline</a>
-			<lift:test_cond.loggedin>
-			| <lift:IndexPage.logout><logout:logoutButton /></lift:IndexPage.logout>
-			</lift:test_cond.loggedin>
-			<br /><div class="ui-widget">
+				<a href="index">home</a>
+				| <a href="timeline">timeline</a>
+				<lift:test_cond.loggedin>
+				| <lift:IndexPage.logout><logout:logoutButton /></lift:IndexPage.logout>
+				<br /><div class="ui-widget">
 					<form name="input" action="user" method="get">
-					<label for="usersearch">User Search: </label>
-					<input id="usersearch" type="text" name="u" />
-					<input type="submit" />
+						<label for="usersearch">User Search: </label>
+						<input id="usersearch" type="text" name="u" />
+						<input type="submit" />
 					</form>
 				</div>
-			</div>
-
-		<hr />
-
-<div class="column span-17 last">
+			</lift:test_cond.loggedin>
+		</div>
+	</div>
 	<div id="content">Something went awry, so I'm displaying default.html.</div>
-</div>
 
-<hr />
-<div class="column span-23 last" style="text-align: center">
-	<h4 class="alt">Retwis-lift is a very simple Twitter clone written in Scala/Lift as an example application of the <a href="http://redis.io">Redis key-value database</a></h4>
-	<h4 class="alt">
-		<a href="http://www.liftweb.net"><i>Lift</i></a> 
-		is Copyright 2007-2011 WorldWide Conferencing, LLC.
-		Distributed under an Apache 2.0 License.</h4>
+	<div id="footer">
+		Retwis-lift is a very simple Twitter clone written in Scala/Lift as an example application of the <a href="http://redis.io">Redis key-value database</a><br />
+		<a href="http://www.liftweb.net"><i>Lift</i></a> is Copyright 2007-2011 WorldWide Conferencing, LLC.  Distributed under an Apache 2.0 License.
 	</div>
 </div>
 </body>

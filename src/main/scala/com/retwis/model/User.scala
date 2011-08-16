@@ -113,7 +113,6 @@ object User {
 	//return TRUE if logged in
 	def isLoggedIn(): Boolean = {
 		val jedis = RetwisDB.pool.getResource()
-		//val authCookie = S.findCookie("auth")
 		var retVal = false
 
 		try {
@@ -132,11 +131,9 @@ object User {
 	//get User object representing the logged in user
 	def getLoggedInUser(): User = {
 		val jedis = RetwisDB.pool.getResource()
-		//val authCookie = S.findCookie("auth")
 		
 		if(isLoggedIn) {
 			try {
-				//val auth = authCookie.openTheBox.value.openTheBox //this seems awfully complicated
 				val userid = jedis.get("auth:" + auth.is)
 				return getUserById(userid)
 			} catch {
@@ -216,7 +213,7 @@ class User(id: String, username: String, password: String) {
 				val postTime = jedis.get("pid:" + postId + ":time")
 				val postMessage = jedis.get("pid:" + postId + ":message")
 				tweets(i) = new Tweet(postId, postTime.toLong, postMessage, username)
-				i = i + 1
+				i += 1
 			}
 			return tweets
 		} catch {
@@ -236,7 +233,7 @@ class User(id: String, username: String, password: String) {
 			jedis.set("pid:" + nextPostId + ":time", Platform.currentTime.toString)
 			jedis.set("pid:" + nextPostId + ":message", message)
 			jedis.lpush("global:timeline", nextPostId.toString)
-			jedis.rpush("uid:" + id + ":posts", nextPostId.toString)
+			jedis.lpush("uid:" + id + ":posts", nextPostId.toString)
 		} catch {
 			case e => e.printStackTrace
 		} finally {

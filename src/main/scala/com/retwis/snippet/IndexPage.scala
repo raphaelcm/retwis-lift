@@ -48,7 +48,6 @@ class IndexPage {
 		val logout = new NodeBuffer &+ "logout"
 
 		bind("logout", xhtml,
-			//"logoutButton" -> SHtml.submit("Logout", processLogout))
 			"logoutButton" -> SHtml.link("index", processLogout, logout))
 	}
 

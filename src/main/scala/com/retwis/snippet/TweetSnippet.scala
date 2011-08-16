@@ -31,7 +31,7 @@ class TweetSnippet {
 		}
 
 		bind("post", xhtml,
-			"postText" -> SHtml.textarea(postText.is, postText(_)),
+			"postText" -> SHtml.textarea(postText.is, postText(_), "cols" -> "70", "rows" -> "3"),
 			"submit" -> SHtml.submit("Update", processPost))
 	}
 }

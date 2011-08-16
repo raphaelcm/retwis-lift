@@ -13,11 +13,10 @@ import Helpers._
 import _root_.scala.xml.{NodeSeq, Text, Group, NodeBuffer}
 
 class FollowSnippet {
-	object targetUser extends RequestVar("")
+	object targetUser extends RequestVar(S.param("u").openTheBox)
 
 	def followButton (xhtml : NodeSeq) : NodeSeq = {
 		val curUser = User.getLoggedInUser
-		targetUser(S.param("u").openTheBox)
 
 		def processFollow () {
 			curUser.followUsername(targetUser.is)
