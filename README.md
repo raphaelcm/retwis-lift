@@ -11,6 +11,7 @@ Language: Scala (http://www.scala-lang.org/)
 
 Getting started
 -----
+0. Set a Redis DB on your localhost
 1. Clone the repository
 2. At the repository root, type './sbt'
 3. Type 'update'
