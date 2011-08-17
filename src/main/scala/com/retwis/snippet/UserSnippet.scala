@@ -19,8 +19,10 @@ class UserSnippet {
 		val userBox = S.param("u")
 		if(userBox.isEmpty) result &+ <h2 class="username">No user by that name.</h2>
 		else {
-			val uname = userBox.openTheBox
-			result &+ <h2 class="username">{uname}</h2>
+			val uid = userBox.openTheBox
+			val uname = RetwisAPI.getUsernameById(uid)
+			if(uname != null) result &+ <h2 class="username">{uname}</h2>
+			else result &+ <h2 class="username">No user by that name.</h2>
 		}
 		result
 	}
@@ -37,5 +39,18 @@ class UserSnippet {
 		bind("followInfo", xhtml,
 			"followers" -> followerCount.toString,
 			"following" -> followingCount.toString)
+	}
+
+	def followLink(): NodeSeq = {
+		val u = RetwisAPI.getLoggedInUser()
+		val userBox = S.param("u")
+		if(!userBox.isEmpty) {
+			val targetId = userBox.openTheBox
+			if (u.getId != targetId)
+			return RetwisAPI.renderFollowHTML(targetId, u.isFollowing(targetId))
+			else
+			return <a href="" class="button">You!</a>
 		}
+		return new NodeBuffer
+	}
 }

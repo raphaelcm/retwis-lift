@@ -20,7 +20,7 @@ class TimelineSnippet {
 			val uIter = usrs.iterator
 			while(uIter.hasNext) {
 				val user = uIter.next
-				result &+ RetwisAPI.renderUserHTML(user.getUsername)
+				result &+ RetwisAPI.renderUserHTML(user.getId, user.getUsername)
 			}	
 		}
 		result

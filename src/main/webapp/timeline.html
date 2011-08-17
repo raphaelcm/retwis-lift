@@ -14,12 +14,12 @@
 		<i>Latest registered users (an example of SORT command!)</i><br />
 		<div><lift:TimelineSnippet.latestRegisteredUsers /></div>
 		
-		<i>Latest 50 messages from users around the world!</i><br />
+		<p><i>Latest 50 messages from users around the world!</i><br />
 		<lift:TimelineSnippet.getGlobalTimeline >
 			<latestTweets:timeline>
 				<div class="post"><post:authorlink /> <post:message /><br /><i>posted <post:elapsedtime /> ago via web</i></div>
 			</latestTweets:timeline>
-		</lift:TimelineSnippet.getGlobalTimeline >
+		</lift:TimelineSnippet.getGlobalTimeline ></p>
 	</div>
 </body>
 </html>

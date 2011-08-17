@@ -21,8 +21,16 @@ object RetwisAPI {
 	object auth extends SessionVar[String]("LoggedOut")
 
 	//render User HTML
-	def renderUserHTML(username: String): NodeSeq = {
-		<a class="username" href={ "user?u=" + username }>{username}</a><br />
+	def renderUserHTML(userid: String, username: String): NodeSeq = {
+		<a class="username" href={ "user?u=" + userid }>{username}</a>
+	}
+
+	//render Follow HTML
+	def renderFollowHTML(userid: String, following: Boolean): NodeSeq = {
+		if(following)
+			<a href={ "follow/id/" + userid } class="button">Unfollow</a>
+		else
+			<a href={ "follow/id/" + userid } class="button">Follow</a>
 	}
 
 	//get last 50 users
@@ -83,6 +91,8 @@ object RetwisAPI {
 				val authToken = getRand()
 				jedis.set("uid:" + userid + ":auth", authToken)
 				jedis.set("auth:" + authToken, userid)
+				jedis.expire("uid:" + userid + ":auth", 60*60*24)
+				jedis.expire("auth:" + authToken, 60*60*24)
 				auth.set(authToken)
 				return true
 			}
@@ -164,6 +174,34 @@ object RetwisAPI {
 		return null
 	}
 
+	def getUsernameById(userid: String): String = {
+		val jedis = pool.getResource()
+		var username = ""
+		try {
+			println("about to: GET uid:" + userid + ":username")
+			username = jedis.get("uid:" + userid + ":username")
+		} catch {
+			case e => e.printStackTrace()
+		} finally {
+			pool.returnResource(jedis)
+		}
+		return username
+	}
+
+	def getIdByUsername(username: String): String = {
+			val jedis = pool.getResource()
+			var uid = ""
+			try {
+				println("about to: GET username:" + username + ":uid")
+				uid = jedis.get("username:" + username + ":uid")
+			} catch {
+				case e => e.printStackTrace()
+			} finally {
+				pool.returnResource(jedis)
+			}
+			return uid
+	}
+
 	//return a User object corresponding to username
 	def getUserByName(username: String): User = {
 		val jedis = pool.getResource()
@@ -241,5 +279,14 @@ object RetwisAPI {
 			pool.returnResource(jedis)
 		}
 		return null
+	}
+	
+	def follow(targetId: String) = {
+		val u = getLoggedInUser
+		if(u != null) {
+			if(u isFollowing targetId) u unFollow targetId
+			else u follow targetId
+		}
+		S.redirectTo("/user?u=" + targetId)
 	}
 }
