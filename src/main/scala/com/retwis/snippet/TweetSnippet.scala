@@ -1,6 +1,7 @@
 package com.retwis.snippet
 
 import com.retwis.model._
+import com.retwis.api._
 import _root_.net.liftweb._
 import http._
 import mapper._
@@ -26,7 +27,7 @@ class TweetSnippet {
 				noErrors = false
 			}
 			if(noErrors) {
-				User.getLoggedInUser.newTweet(postText.toString)
+				RetwisAPI.getLoggedInUser.newTweet(postText.toString)
 			}
 		}
 

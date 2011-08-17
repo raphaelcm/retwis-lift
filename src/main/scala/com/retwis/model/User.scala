@@ -1,6 +1,7 @@
 package com.retwis.model
 
-import com.retwis.util._
+import com.retwis.api._
+import com.retwis.api._
 import scala.collection.immutable.List
 import net.liftweb.http._
 import net.liftweb.http.provider._
@@ -13,173 +14,6 @@ import java.math.BigInteger
 import scala.collection.JavaConversions._
 import _root_.scala.xml.{NodeSeq, Text, Group, NodeBuffer}
 
-//Static User methods
-object User {
-	private val random = new SecureRandom();
-	object auth extends SessionVar[String]("LoggedOut")
-
-	//render User HTML
-	def renderUserHTML(username: String): NodeSeq = {
-		<a class="username" href={ "user?u=" + username }>{username}</a><br />
-	}
-
-	//get last 50 users
-	def getLastUsers(): Array[User] = {
-		val jedis = RetwisDB.pool.getResource
-
-		try {
-			val userIds = jedis.lrange("global:users", 0, 50)
-			var userArray = new Array[User](userIds.length)
-			var i = 0
-			for(id<-userIds) {
-				val username = jedis.get("uid:" + id + ":username")
-				userArray(i) = new User(id, username, "")
-				i += 1
-			}
-			return userArray
-		} catch {
-			case e => e.printStackTrace
-		} finally {
-			RetwisDB.pool.returnResource(jedis)
-		}
-		return null
-	}
-
-	//return a random MD5 hash value (for session keys)
-	private def getRand(): String = {
-		val s = new BigInteger(130, random).toString(32)
-		return new String(MessageDigest.getInstance("MD5").digest(s.getBytes))
-	}
-
-	def createUser(username: String, password: String): Boolean = {
-		val jedis = RetwisDB.pool.getResource
-
-		if(username != null && password != null) {
-			try {
-				if(jedis.get("username:" + username + ":uid") != null) return false
-				val nextUserId = jedis.incr("glabal:nextUserId")
-				jedis.set("username:" + username + ":uid", nextUserId.toString)
-				jedis.set("uid:" + nextUserId.toString + ":username", username)
-				jedis.set("uid:" + nextUserId.toString + ":password", password)
-				jedis.lpush("global:users", nextUserId.toString)
-				return true
-			} catch {
-				case e => e.printStackTrace
-			} finally {
-				RetwisDB.pool.returnResource(jedis)
-			}
-		}
-		return false
-	}
-
-	//return TRUE and set AUTH hash if login info is value, otherwise return FALSE
-	def login(username: String, password: String): Boolean = {
-		val jedis = RetwisDB.pool.getResource()
-		try {
-			val userid = jedis.get("username:" + username + ":uid")
-			if(userid != null && password == jedis.get("uid:" + userid + ":password")) {
-				val authToken = getRand()
-				jedis.set("uid:" + userid + ":auth", authToken)
-				jedis.set("auth:" + authToken, userid)
-				auth.set(authToken)
-				return true
-			}
-		} catch {
-			case e => e.printStackTrace()
-		} finally {
-			RetwisDB.pool.returnResource(jedis)
-		}
-		return false
-	}
-
-	def logout(): Boolean = {
-		val jedis = RetwisDB.pool.getResource()
-		try {
-			val userid = jedis.get("auth:" + auth.is)
-			if(userid != null) {
-				jedis.del("uid:" + userid + ":auth", auth.is)
-				jedis.del("auth:" + auth.is, userid)
-				auth.set("Logged Out")
-				return true
-			}
-		} catch {
-			case e => e.printStackTrace()
-		} finally {
-			RetwisDB.pool.returnResource(jedis)
-		}
-		return false
-	}
-
-	//return TRUE if logged in
-	def isLoggedIn(): Boolean = {
-		val jedis = RetwisDB.pool.getResource()
-		var retVal = false
-
-		try {
-			val userid = jedis.get("auth:" + auth.is)
-			if(userid != null && jedis.get("uid:" + userid + ":auth") == auth.is) {
-				retVal = true
-			}
-		} catch {
-			case e => e.printStackTrace()
-		} finally {
-			RetwisDB.pool.returnResource(jedis)
-		}
-		return retVal
-	}
-	
-	//get User object representing the logged in user
-	def getLoggedInUser(): User = {
-		val jedis = RetwisDB.pool.getResource()
-		
-		if(isLoggedIn) {
-			try {
-				val userid = jedis.get("auth:" + auth.is)
-				return getUserById(userid)
-			} catch {
-				case e => e.printStackTrace()
-			} finally {
-				RetwisDB.pool.returnResource(jedis)
-			}
-		}
-		return null
-	}
-
-	//return a User object corresponding to userid
-	def getUserById(userid: String): User = {
-		val jedis = RetwisDB.pool.getResource()
-		try {
-			var username = jedis.get("uid:" + userid + ":username")
-			var password = jedis.get("uid:" + userid + ":password")
-			if (username != null && password != null) {
-				return new User(userid, username, password)
-			}
-		} catch {
-			case e => e.printStackTrace()
-		} finally {
-			RetwisDB.pool.returnResource(jedis)
-		}
-		return null
-	}
-
-	//return a User object corresponding to username
-	def getUserByName(username: String): User = {
-		val jedis = RetwisDB.pool.getResource()
-		try {
-			val userid = jedis.get("username:" + username + ":uid")
-			val password = jedis.get("uid:" + userid + ":password")
-			if (userid != null && password != null) {
-				return new User(userid, username, password)
-			}
-		} catch {
-			case e => e.printStackTrace()
-		} finally {
-			RetwisDB.pool.returnResource(jedis)
-		}
-		return null
-	}
-}
-
 class User(id: String, username: String, password: String) {	
 	/* Getters */
 	def getId(): String = return id
@@ -188,22 +22,22 @@ class User(id: String, username: String, password: String) {
 
 	//get all tweets belonging to user
 	def getAllTweets(): Array[Tweet] = {
-		val jedis = RetwisDB.pool.getResource
+		val jedis = RetwisAPI.pool.getResource
 
 		try {
 			val numPosts = jedis.llen("uid:" + id + "posts")
-			return this.getNRecentTweets(numPosts.toInt)
+			return getNRecentTweets(numPosts.toInt)
 		} catch {
 			case e => e.printStackTrace
 			return null
 		} finally {
-			RetwisDB.pool.returnResource(jedis)
+			RetwisAPI.pool.returnResource(jedis)
 		}
 	}
 
 	//get N most recent tweets
 	def getNRecentTweets(n: Int): Array[Tweet] = {
-		val jedis = RetwisDB.pool.getResource
+		val jedis = RetwisAPI.pool.getResource
 
 		try {
 			val postIds = jedis.lrange("uid:" + id + ":posts", 0, n)
@@ -220,13 +54,13 @@ class User(id: String, username: String, password: String) {
 			case e => e.printStackTrace
 			return null
 		} finally {
-			RetwisDB.pool.returnResource(jedis)
+			RetwisAPI.pool.returnResource(jedis)
 		}
 	}
 
 	//post new tweet
 	def newTweet(message: String) = {
-		val jedis = RetwisDB.pool.getResource
+		val jedis = RetwisAPI.pool.getResource
 
 		try {
 			val nextPostId = jedis.incr("global:nextPostId")
@@ -238,26 +72,26 @@ class User(id: String, username: String, password: String) {
 		} catch {
 			case e => e.printStackTrace
 		} finally {
-			RetwisDB.pool.returnResource(jedis)
+			RetwisAPI.pool.returnResource(jedis)
 		}
 	}
 
 	//begin following user
 	def follow(followeeId: String) = {
-		val jedis = RetwisDB.pool.getResource
+		val jedis = RetwisAPI.pool.getResource
 
 		try {
 			jedis.sadd("uid:" + id + ":following", followeeId)
 		} catch {
 			case e => e.printStackTrace
 		} finally {
-			RetwisDB.pool.returnResource(jedis)
+			RetwisAPI.pool.returnResource(jedis)
 		}
 	}
 	
 	//follow user by username
 	def followUsername(followeeName: String) = {
-		val jedis = RetwisDB.pool.getResource
+		val jedis = RetwisAPI.pool.getResource
 
 		try {
 			val uid = jedis.get("username:" + followeeName + ":uid")
@@ -265,35 +99,35 @@ class User(id: String, username: String, password: String) {
 		} catch {
 			case e => e.printStackTrace
 		} finally {
-			RetwisDB.pool.returnResource(jedis)
+			RetwisAPI.pool.returnResource(jedis)
 		}
 	}
 
 	//stop following user
 	def unFollow(followeeId: String) = {
-		val jedis = RetwisDB.pool.getResource
+		val jedis = RetwisAPI.pool.getResource
 
 		try {
 			jedis.srem("uid:" + id + ":following", followeeId)
 		} catch {
 			case e => e.printStackTrace
 		} finally {
-			RetwisDB.pool.returnResource(jedis)
+			RetwisAPI.pool.returnResource(jedis)
 		}
 	}
 
 	//return an array of all followers
 	def getFollowers(): Array[User] = {
-		return this.getRelatedUsers("followers")
+		return getRelatedUsers("followers")
 	}
 
 	//return an array of all followees
 	def getFollowing(): Array[User] = {
-		return this.getRelatedUsers("following")
+		return getRelatedUsers("following")
 	}
 
 	def getRelatedUsers(relation: String): Array[User] = {
-		val jedis = RetwisDB.pool.getResource
+		val jedis = RetwisAPI.pool.getResource
 
 		try {
 			val relatedIds = jedis.smembers("uid:" + id + ":" + relation)
@@ -308,7 +142,7 @@ class User(id: String, username: String, password: String) {
 			case e => e.printStackTrace
 			return null
 		} finally {
-			RetwisDB.pool.returnResource(jedis)
+			RetwisAPI.pool.returnResource(jedis)
 		}
 	}
 	

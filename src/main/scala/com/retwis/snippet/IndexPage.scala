@@ -1,6 +1,7 @@
 package com.retwis.snippet
 
 import com.retwis.model._
+import com.retwis.api._
 import _root_.net.liftweb._
 import http._
 import mapper._
@@ -28,7 +29,7 @@ class IndexPage {
 				noErrors = false
 			}
 			if(noErrors) {
-				if(!User.login(username.toString, password)) {
+				if(!RetwisAPI.login(username.toString, password)) {
 					S.error("usernameLogin", "Username/Password did not match")
 				}
 			}
@@ -42,7 +43,7 @@ class IndexPage {
 
 	def logout(xhtml : NodeSeq) : NodeSeq = {
 		def processLogout () {
-			User.logout
+			RetwisAPI.logout
 		}
 
 		val logout = new NodeBuffer &+ "logout"
@@ -73,8 +74,8 @@ class IndexPage {
 				noErrors = false
 			}
 			if(noErrors){
-				User.createUser(username, password)
-				User.login(username, password)
+				RetwisAPI.createUser(username, password)
+				RetwisAPI.login(username, password)
 			}
 		}
 

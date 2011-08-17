@@ -1,6 +1,7 @@
 package com.retwis.snippet
 
 import com.retwis.model._
+import com.retwis.api._
 import _root_.net.liftweb._
 import http._
 import mapper._
@@ -25,12 +26,12 @@ class UserSnippet {
 	}
 
 	def username (xhtml : NodeSeq) : NodeSeq = {
-		val result = new NodeBuffer &+ User.getLoggedInUser.getUsername
+		val result = new NodeBuffer &+ RetwisAPI.getLoggedInUser.getUsername
 		result
 	}
 
 	def followInfo (xhtml : NodeSeq) : NodeSeq = {
-		val u = User.getLoggedInUser
+		val u = RetwisAPI.getLoggedInUser
 		val followerCount = u.getFollowers.length
 		val followingCount = u.getFollowing.length
 		bind("followInfo", xhtml,
