@@ -29,7 +29,7 @@ class IndexPage {
 				noErrors = false
 			}
 			if(noErrors) {
-				if(!RetwisAPI.login(username.toString, password)) {
+				if(!Retwis.login(username.toString, password)) {
 					S.error("usernameLogin", "Username/Password did not match")
 				}
 			}
@@ -43,7 +43,7 @@ class IndexPage {
 
 	def logout(xhtml : NodeSeq) : NodeSeq = {
 		def processLogout () {
-			RetwisAPI.logout
+			Retwis.logout
 		}
 
 		val logout = new NodeBuffer &+ "logout"
@@ -74,8 +74,8 @@ class IndexPage {
 				noErrors = false
 			}
 			if(noErrors){
-				RetwisAPI.createUser(username, password)
-				RetwisAPI.login(username, password)
+				Retwis.createUser(username, password)
+				Retwis.login(username, password)
 			}
 		}
 

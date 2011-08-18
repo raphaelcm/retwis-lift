@@ -14,39 +14,35 @@ import java.math.BigInteger
 import scala.collection.JavaConversions._
 import _root_.scala.xml.{NodeSeq, Text, Group, NodeBuffer}
 
-
-object RetwisAPI {
+object Retwis {
 	val pool = new JedisPool(new JedisPoolConfig(), "localhost");
 	private val random = new SecureRandom();
 	object auth extends SessionVar[String]("LoggedOut")
 
 	//render User HTML
-	def renderUserHTML(userid: String, username: String): NodeSeq = {
+	def getUserLink(userid: String, username: String): NodeSeq = {
 		<a class="username" href={ "user?u=" + userid }>{username}</a>
+	}
+	
+	def getUserLink(userid: String) : NodeSeq = {
+		return getUserLink(userid, getUsernameById(userid))
 	}
 
 	//render Follow HTML
-	def renderFollowHTML(userid: String, following: Boolean): NodeSeq = {
+	def getFollowLink(userid: String, following: Boolean): NodeSeq = {
 		if(following)
 			<a href={ "follow/id/" + userid } class="button">Unfollow</a>
 		else
 			<a href={ "follow/id/" + userid } class="button">Follow</a>
 	}
 
-	//get last 50 users
-	def getLastUsers(): Array[User] = {
+	//get Array of userIds
+	def getUsersInRange(start: Int, end: Int): Array[String] = {
 		val jedis = pool.getResource
 
 		try {
-			val userIds = jedis.lrange("global:users", 0, 50)
-			var userArray = new Array[User](userIds.length)
-			var i = 0
-			for(id<-userIds) {
-				val username = jedis.get("uid:" + id + ":username")
-				userArray(i) = new User(id, username, "")
-				i += 1
-			}
-			return userArray
+			val userIds = jedis.lrange("global:users", start, end)
+			if(userIds != null) return Array[String](userIds: _*)
 		} catch {
 			case e => e.printStackTrace
 		} finally {
@@ -61,25 +57,23 @@ object RetwisAPI {
 		return new String(MessageDigest.getInstance("MD5").digest(s.getBytes))
 	}
 
-	def createUser(username: String, password: String): Boolean = {
+	//create a new user
+	def createUser(username: String, password: String) = {
 		val jedis = pool.getResource
 
-		if(username != null && password != null) {
+		if(username != null && password != null && jedis.get("username:" + username + ":uid") == null) {
 			try {
-				if(jedis.get("username:" + username + ":uid") != null) return false
 				val nextUserId = jedis.incr("glabal:nextUserId")
 				jedis.set("username:" + username + ":uid", nextUserId.toString)
 				jedis.set("uid:" + nextUserId.toString + ":username", username)
 				jedis.set("uid:" + nextUserId.toString + ":password", password)
 				jedis.lpush("global:users", nextUserId.toString)
-				return true
 			} catch {
 				case e => e.printStackTrace
 			} finally {
 				pool.returnResource(jedis)
 			}
 		}
-		return false
 	}
 
 	//return TRUE and set AUTH hash if login info is value, otherwise return FALSE
@@ -140,14 +134,30 @@ object RetwisAPI {
 		return retVal
 	}
 	
-	//get User object representing the logged in user
-	def getLoggedInUser(): User = {
+	//get userid representing the logged in user
+	def getLoggedInId(): String = {
+		val jedis = pool.getResource()
+		
+		if(isLoggedIn) {
+			try {
+				return jedis.get("auth:" + auth.is)
+			} catch {
+				case e => e.printStackTrace()
+			} finally {
+				pool.returnResource(jedis)
+			}
+		}
+		return null
+	}
+	
+	//get username representing the logged in user
+	def getLoggedInUsername(): String = {
 		val jedis = pool.getResource()
 		
 		if(isLoggedIn) {
 			try {
 				val userid = jedis.get("auth:" + auth.is)
-				return getUserById(userid)
+				return getUsernameById(userid)
 			} catch {
 				case e => e.printStackTrace()
 			} finally {
@@ -157,28 +167,10 @@ object RetwisAPI {
 		return null
 	}
 
-	//return a User object corresponding to userid
-	def getUserById(userid: String): User = {
-		val jedis = pool.getResource()
-		try {
-			var username = jedis.get("uid:" + userid + ":username")
-			var password = jedis.get("uid:" + userid + ":password")
-			if (username != null && password != null) {
-				return new User(userid, username, password)
-			}
-		} catch {
-			case e => e.printStackTrace()
-		} finally {
-			pool.returnResource(jedis)
-		}
-		return null
-	}
-
 	def getUsernameById(userid: String): String = {
 		val jedis = pool.getResource()
 		var username = ""
 		try {
-			println("about to: GET uid:" + userid + ":username")
 			username = jedis.get("uid:" + userid + ":username")
 		} catch {
 			case e => e.printStackTrace()
@@ -192,7 +184,6 @@ object RetwisAPI {
 			val jedis = pool.getResource()
 			var uid = ""
 			try {
-				println("about to: GET username:" + username + ":uid")
 				uid = jedis.get("username:" + username + ":uid")
 			} catch {
 				case e => e.printStackTrace()
@@ -200,23 +191,6 @@ object RetwisAPI {
 				pool.returnResource(jedis)
 			}
 			return uid
-	}
-
-	//return a User object corresponding to username
-	def getUserByName(username: String): User = {
-		val jedis = pool.getResource()
-		try {
-			val userid = jedis.get("username:" + username + ":uid")
-			val password = jedis.get("uid:" + userid + ":password")
-			if (userid != null && password != null) {
-				return new User(userid, username, password)
-			}
-		} catch {
-			case e => e.printStackTrace()
-		} finally {
-			pool.returnResource(jedis)
-		}
-		return null
 	}
 	
 	//create a string showing the time elapsed
@@ -260,12 +234,12 @@ object RetwisAPI {
 		return null
 	}
 
-	//get last 50 tweets
-	def getLastTweets(): Array[Tweet] = {
+	//get tweets in range [start .. end]
+	def getGlobalTweetsInRange(start: Int, end: Int): Array[Tweet] = {
 		val jedis = pool.getResource
 
 		try {
-			val tweetIds = jedis.lrange("global:timeline", 0, 50)
+			val tweetIds = jedis.lrange("global:timeline", start, end)
 			var tweets = new Array[Tweet](tweetIds.length)
 			var i = 0
 			for(id<-tweetIds) {
@@ -281,12 +255,122 @@ object RetwisAPI {
 		return null
 	}
 	
+	def getAllGlobalTweets(): Array[Tweet] = {
+		return getGlobalTweetsInRange(0, -1)
+	}
+	
+	//get tweets in range [start .. end]
+	def getUserTweetsInRange(uid: String, start: Int, end: Int): Array[Tweet] = {
+		val jedis = pool.getResource
+
+		try {
+			val tweetIds = jedis.lrange("uid:" + uid + ":posts", start, end)
+			var tweets = new Array[Tweet](tweetIds.length)
+			var i = 0
+			for(id<-tweetIds) {
+				tweets(i) = new Tweet(id, jedis.get("pid:" + id + ":time").toLong, jedis.get("pid:" + id + ":message"), jedis.get("pid:" + id + ":uid"))
+				i += 1
+			}
+			return tweets
+		} catch {
+			case e => e.printStackTrace
+		} finally {
+			pool.returnResource(jedis)
+		}
+		return null
+	}
+	
+	def getAllUserTweets(uid: String): Array[Tweet] = {
+		return getUserTweetsInRange(uid, 0, -1)
+	}
+
+	def getAllUserTweets(): Array[Tweet] = {
+		return getUserTweetsInRange(getLoggedInId, 0, -1)
+	}
+	
+	//post new tweet and get author Id from Session
+	def newTweet(message: String) = {
+		val jedis = pool.getResource
+		val uid = getLoggedInId
+		try {
+			val nextPostId = jedis.incr("global:nextPostId")
+			jedis.set("pid:" + nextPostId + ":time", Platform.currentTime.toString)
+			jedis.set("pid:" + nextPostId + ":message", message)
+			jedis.set("pid:" + nextPostId + ":uid", uid)
+			jedis.lpush("global:timeline", nextPostId.toString)
+			jedis.lpush("uid:" + uid + ":posts", nextPostId.toString)
+		} catch {
+			case e => e.printStackTrace
+		} finally {
+			pool.returnResource(jedis)
+		}
+	}
+	
 	def follow(targetId: String) = {
-		val u = getLoggedInUser
-		if(u != null) {
-			if(u isFollowing targetId) u unFollow targetId
-			else u follow targetId
+		val jedis = pool.getResource
+		try {
+			val id = getLoggedInId
+		if(isFollowing(targetId)) {
+			println("SREM " + "uid:" + id + ":following " + targetId)
+			jedis.srem("uid:" + id + ":following", targetId)
+			println("SREM " + "uid:" + targetId + ":following " + id)
+			jedis.srem("uid:" + targetId + ":followers", id)
+		} else {
+			println("SADD " + "uid:" + id + ":following " + targetId)
+			jedis.sadd("uid:" + id + ":following", targetId)
+			println("SADD " + "uid:" + targetId + ":followers " + id)
+			jedis.sadd("uid:" + targetId + ":followers", id)
+		}	
+		} catch {
+			case e => e.printStackTrace
+		} finally {
+			pool.returnResource(jedis)
 		}
 		S.redirectTo("/user?u=" + targetId)
+	}
+	
+	//return an array of all followers for logged in user
+	def getFollowers(): Array[String] = {
+		return getRelatedUsers(getLoggedInId, "followers")
+	}
+
+	//return an array of all followees for logged in user
+	def getFollowing(): Array[String] = {
+		return getRelatedUsers(getLoggedInId, "following")
+	}
+
+	def getRelatedUsers(uid: String, relation: String): Array[String] = {
+		val jedis = pool.getResource
+
+		try {
+			val relatedIds = jedis.smembers("uid:" + uid + ":" + relation).toList
+			if(relatedIds != null) return Array[String](relatedIds: _*)
+		} catch {
+			case e => e.printStackTrace
+		} finally {
+			pool.returnResource(jedis)
+		}
+		return null
+	}
+	
+	def isTargetRelated(target: String, relation:String): Boolean = {
+			val jedis = pool.getResource
+			var retVal = false
+			try {
+				retVal =  jedis.sismember("uid:" + getLoggedInId + ":" + relation, target)
+			} 	catch {
+				case e => e.printStackTrace
+			} finally {
+				pool.returnResource(jedis)
+			}
+			return retVal
+	}
+	
+	def isFollowing(target: String): Boolean = {
+		return isTargetRelated(target, "following")
+	}
+	
+	def isFollower(target: String): Boolean = {
+		return isTargetRelated(target, "follower")
 	}
 }

@@ -12,9 +12,4 @@ class Tweet(id: String, time: Long, message: String, authorId: String) {
 	def getTime(): Long = return time
 	def getMessage(): String = return message
 	def getAuthorId(): String = return authorId
-	
-	def getAuthorLink(): NodeSeq = {
-		val u = RetwisAPI.getUserById(authorId)
-		return RetwisAPI.renderUserHTML(u.getId, u.getUsername)
-	}
 }

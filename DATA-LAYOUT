@@ -13,7 +13,7 @@ uid:1000:auth 9458sd893448dfd
 auth:9458sd893448dfd => 1000
 uid:1000:following (set of user ids)
 uid:1000:followers (set of user ids)
-uid:1000:posts (list of posts ids)
+uid:1000:posts (list of post ids)
 
 UPDATES
 

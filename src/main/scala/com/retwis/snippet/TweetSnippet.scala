@@ -27,7 +27,7 @@ class TweetSnippet {
 				noErrors = false
 			}
 			if(noErrors) {
-				RetwisAPI.getLoggedInUser.newTweet(postText.toString)
+				Retwis.newTweet(postText.toString)
 			}
 		}
 

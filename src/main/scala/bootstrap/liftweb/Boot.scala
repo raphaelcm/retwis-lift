@@ -55,13 +55,13 @@ class Boot {
 	//Logged in/out test
 	LiftRules.loggedInTest = Full( 
 	  () => {
-	    	RetwisAPI.isLoggedIn()
+	    	Retwis.isLoggedIn()
 	  }
 	)
 	
 	LiftRules.dispatch.append {
 	  case Req("follow" :: "id" :: followId :: Nil, _, _) =>
-	    RetwisAPI.follow(followId)
+	    Retwis.follow(followId)
 	}
 
     // Use HTML5 for rendering
