@@ -16,7 +16,8 @@ libraryDependencies ++= {
   Seq(
   "net.liftweb" %% "lift-webkit" % liftVersion % "compile->default",
   "net.liftweb" %% "lift-mapper" % liftVersion % "compile->default",
-  "net.liftweb" %% "lift-wizard" % liftVersion % "compile->default"
+  "net.liftweb" %% "lift-wizard" % liftVersion % "compile->default",
+  "net.liftweb" %% "lift-json" % liftVersion % "compile->default"
   )
 }
  

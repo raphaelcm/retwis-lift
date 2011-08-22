@@ -45,7 +45,7 @@ class TimelineSnippet {
 	def latestTweets (latestTweets: Array[Tweet], xhtml: NodeSeq) : NodeSeq = {
 		if(latestTweets == null) return xhtml
 		def bindTweets(template: NodeSeq): NodeSeq = {
-			latestTweets.toList.flatMap{ t => bind("post", template, "authorlink" -> Retwis.getUserLink(t.getAuthorId), "message" -> t.getMessage, "elapsedtime" -> Retwis.strElapsed(t.getTime))}
+			latestTweets.toList.flatMap{ t => bind("post", template, "authorlink" -> Retwis.getUserLink(t.authorId), "message" -> t.message, "elapsedtime" -> Retwis.strElapsed(t.time))}
 		}
 		bind("latestTweets", xhtml, "timeline" -> bindTweets _)
 	}

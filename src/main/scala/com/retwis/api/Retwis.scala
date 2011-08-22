@@ -219,11 +219,9 @@ object Retwis {
 		val jedis = pool.getResource()
 
 		try {
-			val time = jedis.get("pid:" + id + ":time")
-			val message = jedis.get("pid:" + id + ":message")
-			val authorId = jedis.get("pid:" + id + ":uid")
-			if (time != null && message != null) {
-				return new Tweet(id, time.toLong, message, authorId)
+			val jsonTwt = jedis.get("pid:" + id + ":tweet")
+			if (jsonTwt != null) {
+				return Tweet.getTweetFromJson(jsonTwt)
 			}
 		} catch {
 			case e => e.printStackTrace()
@@ -243,7 +241,7 @@ object Retwis {
 			var tweets = new Array[Tweet](tweetIds.length)
 			var i = 0
 			for(id<-tweetIds) {
-				tweets(i) = new Tweet(id, jedis.get("pid:" + id + ":time").toLong, jedis.get("pid:" + id + ":message"), jedis.get("pid:" + id + ":uid"))
+				tweets(i) = Tweet.getTweetFromJson(jedis.get("pid:" + id + ":tweet"))
 				i += 1
 			}
 			return tweets
@@ -268,7 +266,7 @@ object Retwis {
 			var tweets = new Array[Tweet](tweetIds.length)
 			var i = 0
 			for(id<-tweetIds) {
-				tweets(i) = new Tweet(id, jedis.get("pid:" + id + ":time").toLong, jedis.get("pid:" + id + ":message"), jedis.get("pid:" + id + ":uid"))
+				tweets(i) = Tweet.getTweetFromJson(jedis.get("pid:" + id + ":tweet"))
 				i += 1
 			}
 			return tweets
@@ -294,9 +292,8 @@ object Retwis {
 		val uid = getLoggedInId
 		try {
 			val nextPostId = jedis.incr("global:nextPostId")
-			jedis.set("pid:" + nextPostId + ":time", Platform.currentTime.toString)
-			jedis.set("pid:" + nextPostId + ":message", message)
-			jedis.set("pid:" + nextPostId + ":uid", uid)
+			val newTwt = new Tweet(nextPostId.toString, Platform.currentTime, message, uid)
+			jedis.set("pid:" + nextPostId + ":tweet", newTwt.toJson)
 			jedis.lpush("global:timeline", nextPostId.toString)
 			jedis.lpush("uid:" + uid + ":posts", nextPostId.toString)
 		} catch {
@@ -311,14 +308,10 @@ object Retwis {
 		try {
 			val id = getLoggedInId
 		if(isFollowing(targetId)) {
-			println("SREM " + "uid:" + id + ":following " + targetId)
 			jedis.srem("uid:" + id + ":following", targetId)
-			println("SREM " + "uid:" + targetId + ":following " + id)
 			jedis.srem("uid:" + targetId + ":followers", id)
 		} else {
-			println("SADD " + "uid:" + id + ":following " + targetId)
 			jedis.sadd("uid:" + id + ":following", targetId)
-			println("SADD " + "uid:" + targetId + ":followers " + id)
 			jedis.sadd("uid:" + targetId + ":followers", id)
 		}	
 		} catch {

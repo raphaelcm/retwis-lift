@@ -18,9 +18,7 @@ uid:1000:posts (list of post ids)
 UPDATES
 
 incr global:nextPostId => 134
-pid:134:time => time (in mills)
-pid:134:message => message
-pid:134:uid => uid of author
+pid:134:tweet => Tweet (serialized as JSON string)
 
 TIMELINE
 
