@@ -221,7 +221,7 @@ object Retwis {
 		try {
 			val jsonTwt = jedis.get("pid:" + id + ":tweet")
 			if (jsonTwt != null) {
-				return Tweet.getTweetFromJson(jsonTwt)
+				return Tweet(jsonTwt)
 			}
 		} catch {
 			case e => e.printStackTrace()
@@ -241,7 +241,7 @@ object Retwis {
 			var tweets = new Array[Tweet](tweetIds.length)
 			var i = 0
 			for(id<-tweetIds) {
-				tweets(i) = Tweet.getTweetFromJson(jedis.get("pid:" + id + ":tweet"))
+				tweets(i) = Tweet(jedis.get("pid:" + id + ":tweet"))
 				i += 1
 			}
 			return tweets
@@ -266,7 +266,7 @@ object Retwis {
 			var tweets = new Array[Tweet](tweetIds.length)
 			var i = 0
 			for(id<-tweetIds) {
-				tweets(i) = Tweet.getTweetFromJson(jedis.get("pid:" + id + ":tweet"))
+				tweets(i) = Tweet(jedis.get("pid:" + id + ":tweet"))
 				i += 1
 			}
 			return tweets
